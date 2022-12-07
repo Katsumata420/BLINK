@@ -35,7 +35,7 @@ setup(
         "numpy>=1.17.2",
         "segtok>=1.5.7",
         "flair>=0.4.3",
-        "transformers>=4.0.0"
+        "transformers>=4.0.0",
         "colorama>=0.4.3",
         "termcolor>=1.1.0",
         "faiss-cpu>=1.6.1",
