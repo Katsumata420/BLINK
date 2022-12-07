@@ -12,13 +12,7 @@ import torch.nn.functional as F
 
 from collections import OrderedDict
 from tqdm import tqdm
-from pytorch_transformers.modeling_utils import CONFIG_NAME, WEIGHTS_NAME
-
-from pytorch_transformers.modeling_bert import BertModel
-from pytorch_transformers.modeling_roberta import RobertaModel
-
-from pytorch_transformers.tokenization_bert import BertTokenizer
-from pytorch_transformers.tokenization_roberta import RobertaTokenizer
+from transformers import AutoTokenizer, BertModel, RobertaModel, CONFIG_NAME, WEIGHTS_NAME
 
 from blink.common.ranker_base import BertEncoder, get_model_obj
 from blink.common.optimizer import get_bert_optimizer
@@ -65,9 +59,9 @@ class CrossEncoderRanker(torch.nn.Module):
         self.n_gpu = torch.cuda.device_count()
 
         if params.get("roberta"):
-            self.tokenizer = RobertaTokenizer.from_pretrained(params["bert_model"],)
+            self.tokenizer = AutoTokenizer.from_pretrained(params["bert_model"],)
         else:
-            self.tokenizer = BertTokenizer.from_pretrained(
+            self.tokenizer = AutoTokenizer.from_pretrained(
                 params["bert_model"], do_lower_case=params["lowercase"]
             )
 

@@ -8,18 +8,18 @@ import torch
 import os
 import numpy as np
 
-from pytorch_transformers.modeling_bert import (
+from transformers import (
+    AdamW,
+    AutoTokenizer,
     BertPreTrainedModel,
     BertModel,
+    PYTORCH_PRETRAINED_BERT_CACHE,
+    get_linear_schedule_with_warmup,
 )
-from pytorch_transformers.tokenization_bert import BertTokenizer
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
 from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
 from tqdm import tqdm
-
-from pytorch_transformers.optimization import AdamW, WarmupLinearSchedule
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 
 
 class BertForReranking(BertPreTrainedModel):
@@ -42,9 +42,9 @@ class BertForReranking(BertPreTrainedModel):
                 
                 ``token_type_ids:   0   0   0   0  0     0   0``
     
-            Indices can be obtained using :class:`pytorch_transformers.BertTokenizer`.
-            See :func:`pytorch_transformers.PreTrainedTokenizer.encode` and
-            :func:`pytorch_transformers.PreTrainedTokenizer.convert_tokens_to_ids` for details.
+            Indices can be obtained using :class:`transformers.AutoTokenizer`.
+            See :func:`transformers.PreTrainedTokenizer.encode` and
+            :func:`transformers.PreTrainedTokenizer.convert_tokens_to_ids` for details.
         **token_type_ids**: (`optional`) ``torch.LongTensor`` of shape ``(batch_size, num_choices, sequence_length)``:
             Segment token indices to indicate first and second portions of the inputs.
             The second dimension of the input (`num_choices`) indicates the number of choices to score.
@@ -81,7 +81,7 @@ class BertForReranking(BertPreTrainedModel):
 
     Examples::
 
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
         model = BertForMultipleChoice.from_pretrained('bert-base-uncased')
         choices = ["Hello, my dog is cute", "Hello, my cat is amazing"]
         input_ids = torch.tensor([tokenizer.encode(s) for s in choices]).unsqueeze(0)  # Batch size 1, 2 choices
@@ -267,10 +267,10 @@ class BertReranker:
             correct_bias=False,
         )
 
-        scheduler = WarmupLinearSchedule(
+        scheduler = get_linear_schedule_with_warmup(
             optimizer,
-            warmup_steps=num_warmup_steps,
-            t_total=num_train_optimization_steps,
+            num_warmup_steps=num_warmup_steps,
+            num_training_steps=num_train_optimization_steps,
         )
 
         logger.info("  Num optimization steps = %d", num_train_optimization_steps)
@@ -293,7 +293,7 @@ class BertReranker:
 
     @staticmethod
     def get_tokenizer(parameters):
-        tokenizer = BertTokenizer.from_pretrained(
+        tokenizer = AutoTokenizer.from_pretrained(
             parameters["path_to_model"], do_lower_case=parameters["lowercase_flag"]
         )
         return tokenizer
