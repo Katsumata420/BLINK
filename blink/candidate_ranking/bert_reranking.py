@@ -10,7 +10,6 @@ import numpy as np
 
 from pytorch_transformers.modeling_bert import (
     BertPreTrainedModel,
-    BertConfig,
     BertModel,
 )
 from pytorch_transformers.tokenization_bert import BertTokenizer

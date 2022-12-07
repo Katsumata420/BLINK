@@ -14,16 +14,8 @@ from collections import OrderedDict
 from tqdm import tqdm
 from pytorch_transformers.modeling_utils import CONFIG_NAME, WEIGHTS_NAME
 
-from pytorch_transformers.modeling_bert import (
-    BertPreTrainedModel,
-    BertConfig,
-    BertModel,
-)
-
-from pytorch_transformers.modeling_roberta import (
-    RobertaConfig,
-    RobertaModel,
-)
+from pytorch_transformers.modeling_bert import BertModel
+from pytorch_transformers.modeling_roberta import RobertaModel
 
 from pytorch_transformers.tokenization_bert import BertTokenizer
 from pytorch_transformers.tokenization_roberta import RobertaTokenizer

@@ -22,9 +22,7 @@ from collections import OrderedDict
 
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
 
-from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 from pytorch_transformers.optimization import WarmupLinearSchedule
-from pytorch_transformers.tokenization_bert import BertTokenizer
 from pytorch_transformers.modeling_utils import WEIGHTS_NAME
 
 from blink.biencoder.biencoder import BiEncoderRanker, load_biencoder
@@ -32,7 +30,6 @@ import logging
 
 import blink.candidate_ranking.utils as utils
 import blink.biencoder.data_process as data
-from blink.biencoder.zeshel_utils import DOC_PATH, WORLDS, world_to_id
 from blink.common.optimizer import get_bert_optimizer
 from blink.common.params import BlinkParser
 
