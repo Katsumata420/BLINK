@@ -10,8 +10,6 @@ import torch
 from tqdm import tqdm, trange
 from torch.utils.data import DataLoader, TensorDataset
 
-from pytorch_transformers.tokenization_bert import BertTokenizer
-
 from blink.biencoder.zeshel_utils import world_to_id
 from blink.common.params import ENT_START_TAG, ENT_END_TAG, ENT_TITLE_TAG
 
@@ -170,7 +168,6 @@ def process_mention_data(
             logger.info(
                 "Label ids : " + " ".join([str(v) for v in sample["label"]["ids"]])
             )
-            logger.info("Src : %d" % sample["src"][0])
             logger.info("Label_id : %d" % sample["label_idx"][0])
 
     context_vecs = torch.tensor(

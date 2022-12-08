@@ -215,7 +215,7 @@ class BlinkParser(argparse.ArgumentParser):
             default=0.1,
             type=float,
             help="Proportion of training to perform linear learning rate warmup for. "
-            "E.g., 0.1 = 10% of training.",
+            "E.g., 0.1 = 10 percent of training.",
         )
         parser.add_argument(
             "--gradient_accumulation_steps",
