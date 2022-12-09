@@ -7,11 +7,35 @@
 
 import logging
 import torch
+import datasets
+import numpy as np
+from typing import Dict, List, Tuple, Union
 from tqdm import tqdm, trange
 from torch.utils.data import DataLoader, TensorDataset
 
 from blink.biencoder.zeshel_utils import world_to_id
 from blink.common.params import ENT_START_TAG, ENT_END_TAG, ENT_TITLE_TAG
+
+
+def data_collator_for_hf(
+    features: List[Dict[str, Union[torch.LongTensor, np.ndarray, List[int]]]]
+) -> Tuple[torch.LongTensor]:
+    data_keys = ["context", "label", "label_idx"]
+    sample_element = features[0]["context"]
+
+    batch = {}
+    for key in data_keys:
+        if isinstance(sample_element, torch.Tensor):
+            batch[key] = torch.stack([f[key] for f in features])
+        elif isinstance(sample_element, np.ndarray):
+            batch[key] = torch.tensor(np.stack([f[k] for f in features]))
+        else:
+            batch[key] = torch.tensor([f[key] for f in features])
+
+    if "src" in data_keys:
+        return batch["context"], batch["label"], batch["src"], batch["label_idx"]
+    else:
+        return batch["context"], batch["label"], batch["label_idx"]
 
 
 def select_field(data, key1, key2=None):
@@ -94,6 +118,66 @@ def get_candidate_representation(
         "ids": input_ids,
     }
 
+
+def process_mention_data_for_hf(
+    samples,
+    tokenizer,
+    max_context_length,
+    max_cand_length,
+    mention_key="mention",
+    context_key="context",
+    label_key="label",
+    title_key='label_title',
+    ent_start_token=ENT_START_TAG,
+    ent_end_token=ENT_END_TAG,
+    title_token=ENT_TITLE_TAG,
+    debug=False,
+    logger=None,
+):
+    """hf Dataset に対して処理を行う"""
+    if debug:
+        if isinstance(samples, datasets.IterableDataset):
+            samples = samples.take(200)
+        elif isinstance(samples, datasets.Dataset):
+            samples = samples.select(range(200))
+
+    def preprocess(sample: Dict[str, Union[str, int]]) -> Dict[str, torch.LongTensor]:
+        context_tokens = get_context_representation(
+            sample,
+            tokenizer,
+            max_context_length,
+            mention_key,
+            context_key,
+            ent_start_token,
+            ent_end_token,
+        )
+
+        label = sample[label_key]
+        title = sample.get(title_key, None)
+        label_tokens = get_candidate_representation(
+            label, tokenizer, max_cand_length, title,
+        )
+        label_idx = int(sample["label_id"])
+
+        context_vecs = torch.tensor(context_tokens["ids"], dtype=torch.long)
+        cand_vecs = torch.tensor(label_tokens["ids"], dtype=torch.long)
+        label_idx = torch.tensor([label_idx], dtype=torch.long)
+
+        record = {
+            "context": context_vecs,
+            "label": cand_vecs,
+            "label_idx": label_idx,
+        }
+
+        if "world" in sample:
+            src = sample["world"]
+            src = world_to_id[src]
+            record["src"] = torch.tensor([src], dtype=torch.long)
+
+        return record
+
+    processed_samples = samples.map(preprocess)
+    return processed_samples
 
 def process_mention_data(
     samples,
