@@ -163,6 +163,12 @@ class BlinkParser(argparse.ArgumentParser):
             required=True,
             help="The output directory where generated output file (model, etc.) is to be dumped.",
         )
+        parser.add_argument(
+            "--cache_dir",
+            default=None,
+            type=str,
+            help="dataset cache dir. Default path may be /home/user/.cache/...",
+        )
 
 
     def add_training_args(self, args=None):

@@ -142,7 +142,10 @@ def main(params):
 
     # Load train data
     train_samples = load_dataset(
-        "json", data_files={"train": os.path.join(params["data_path"], "train.jsonl")}, streaming=False
+        "json",
+        data_files={"train": os.path.join(params["data_path"], "train.jsonl")},
+        streaming=False,
+        cache_dir=params["cache_dir"],
     )["train"]
     logger.info("Read %d train samples." % len(train_samples))
 
